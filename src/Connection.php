@@ -2,7 +2,6 @@
 
 namespace Ultainfinity\SolanaPhpSdk;
 
-use Ultainfinity\SolanaPhpSdk\Exceptions\AccountNotFoundException;
 use Ultainfinity\SolanaPhpSdk\Util\Commitment;
 
 class Connection extends Program
@@ -13,13 +12,13 @@ class Connection extends Program
      */
     public function getAccountInfo(string $pubKey): array
     {
-        $accountResponse = $this->client->call('getAccountInfo', [$pubKey, ["encoding" => "jsonParsed"]])['value'];
+        $response = $this->client->call('getAccountInfo', [$pubKey, ["encoding" => "jsonParsed"]])['value'];
 
-        if (! $accountResponse) {
-            throw new AccountNotFoundException("API Error: Account {$pubKey} not found.");
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Account {$pubKey} not found", 404);
         }
 
-        return $accountResponse;
+        return $esponse;
     }
 
     /**
@@ -28,7 +27,13 @@ class Connection extends Program
      */
     public function getBalance(string $pubKey): float
     {
-        return $this->client->call('getBalance', [$pubKey])['value'];
+        $esponse = $this->client->call('getBalance', [$pubKey])['value'];
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get balance for account {$pubKey}");
+        }
+
+        return $esponse;
     }
 
     /**
@@ -37,7 +42,13 @@ class Connection extends Program
      */
     public function getConfirmedTransaction(string $transactionSignature): array
     {
-        return $this->client->call('getConfirmedTransaction', [$transactionSignature]);
+        $esponse = $this->client->call('getConfirmedTransaction', [$transactionSignature]);
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get transaction {$transactionSignature}");
+        }
+
+        return $esponse;
     }
 
     /**
@@ -48,7 +59,13 @@ class Connection extends Program
      */
     public function getTransaction(string $transactionSignature): array
     {
-        return $this->client->call('getTransaction', [$transactionSignature]);
+        $esponse = $this->client->call('getTransaction', [$transactionSignature]);
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get transaction {$transactionSignature}");
+        }
+
+        return $esponse;
     }
 
     /**
@@ -58,7 +75,13 @@ class Connection extends Program
      */
     public function getRecentBlockhash(?Commitment $commitment = null): array
     {
-        return $this->client->call('getRecentBlockhash', array_filter([$commitment]))['value'];
+        $esponse = $this->client->call('getRecentBlockhash', array_filter([$commitment]))['value'];
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get recent blockhash");
+        }
+
+        return $esponse;
     }
 
     /**
@@ -72,7 +95,7 @@ class Connection extends Program
      */
     public function sendTransaction(Transaction $transaction, array $signers, array $params = [])
     {
-        if (! $transaction->recentBlockhash) {
+        if (!$transaction->recentBlockhash) {
             $transaction->recentBlockhash = $this->getRecentBlockhash()['blockhash'];
         }
 

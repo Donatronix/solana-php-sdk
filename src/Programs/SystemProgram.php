@@ -2,11 +2,11 @@
 
 namespace Ultainfinity\SolanaPhpSdk\Programs;
 
-use Ultainfinity\SolanaPhpSdk\Exceptions\AccountNotFoundException;
 use Ultainfinity\SolanaPhpSdk\Program;
 use Ultainfinity\SolanaPhpSdk\PublicKey;
 use Ultainfinity\SolanaPhpSdk\TransactionInstruction;
 use Ultainfinity\SolanaPhpSdk\Util\AccountMeta;
+use Ultainfinity\SolanaPhpSdk\Util\Commitment;
 
 class SystemProgram extends Program
 {
@@ -29,13 +29,13 @@ class SystemProgram extends Program
      */
     public function getAccountInfo(string $pubKey): array
     {
-        $accountResponse = $this->client->call('getAccountInfo', [$pubKey, ["encoding" => "jsonParsed"]])['value'];
+        $response = $this->client->call('getAccountInfo', [$pubKey, ["encoding" => "jsonParsed"]])['value'];
 
-        if (! $accountResponse) {
-            throw new AccountNotFoundException("API Error: Account {$pubKey} not found.");
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Account {$pubKey} not found", 404);
         }
 
-        return $accountResponse;
+        return $esponse;
     }
 
     /**
@@ -44,7 +44,13 @@ class SystemProgram extends Program
      */
     public function getBalance(string $pubKey): float
     {
-        return $this->client->call('getBalance', [$pubKey])['value'];
+        $esponse = $this->client->call('getBalance', [$pubKey])['value'];
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get balance for account {$pubKey}");
+        }
+
+        return $esponse;
     }
 
     /**
@@ -53,7 +59,13 @@ class SystemProgram extends Program
      */
     public function getConfirmedTransaction(string $transactionSignature): array
     {
-        return $this->client->call('getConfirmedTransaction', [$transactionSignature]);
+        $esponse = $this->client->call('getConfirmedTransaction', [$transactionSignature]);
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get transaction {$transactionSignature}");
+        }
+
+        return $esponse;
     }
 
     /**
@@ -64,7 +76,29 @@ class SystemProgram extends Program
      */
     public function getTransaction(string $transactionSignature): array
     {
-        return $this->client->call('getTransaction', [$transactionSignature]);
+        $esponse = $this->client->call('getTransaction', [$transactionSignature]);
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get transaction {$transactionSignature}");
+        }
+
+        return $esponse;
+    }
+
+    /**
+     * @param Commitment|null $commitment
+     * @return array
+     * @throws Exceptions\GenericException|Exceptions\MethodNotFoundException|Exceptions\InvalidIdResponseException
+     */
+    public function getRecentBlockhash(?Commitment $commitment = null): array
+    {
+        $esponse = $this->client->call('getRecentBlockhash', array_filter([$commitment]))['value'];
+
+        if (!$esponse) {
+            throw new \Exception("Solana API Error: Can't get recent blockhash");
+        }
+
+        return $esponse;
     }
 
     /**
